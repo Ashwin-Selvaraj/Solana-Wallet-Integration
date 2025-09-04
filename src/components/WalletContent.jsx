@@ -2,6 +2,7 @@ import React from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import WalletBalance from './WalletBalance'
+import DepositComponent from './DepositComponent'
 
 const WalletContent = () => {
   console.log('📱 WalletContent component is rendering')
@@ -32,6 +33,9 @@ const WalletContent = () => {
 
       {/* Wallet Balance Component */}
       <WalletBalance />
+
+      {/* Deposit Component - Only show when wallet is connected */}
+      {connected && <DepositComponent />}
     </div>
   )
 }
