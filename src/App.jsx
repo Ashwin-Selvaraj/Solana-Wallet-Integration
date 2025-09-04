@@ -1,6 +1,7 @@
 import React from 'react'
 import './App.css'
 import { WalletContext, WalletContent } from './components'
+import ErrorBoundary from './components/ErrorBoundary'
 import '@solana/wallet-adapter-react-ui/styles.css'
 
 function App() {
@@ -10,7 +11,9 @@ function App() {
 
   return (
     <WalletContext>
-      <WalletContent />
+      <ErrorBoundary>
+        <WalletContent />
+      </ErrorBoundary>
     </WalletContext>
   )
 }
