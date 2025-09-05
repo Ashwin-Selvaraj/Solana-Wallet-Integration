@@ -4,6 +4,7 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import WalletBalance from './WalletBalance'
 import DepositComponent from './DepositComponent'
 import LoginComponent from './LoginComponent'
+import GameBalanceComponent from './GameBalanceComponent'
 import authService from '../services/authService'
 
 const WalletContent = () => {
@@ -55,6 +56,9 @@ const WalletContent = () => {
 
       {/* Wallet Balance Component */}
       <WalletBalance />
+
+      {/* Game Balance Component - Only show when user is authenticated */}
+      {isAuthenticated && <GameBalanceComponent />}
 
       {/* Deposit Component - Only show when wallet is connected AND user is authenticated */}
       {connected && isAuthenticated && <DepositComponent />}
