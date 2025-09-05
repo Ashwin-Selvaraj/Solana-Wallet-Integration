@@ -61,6 +61,12 @@ export const isDevelopment = () => {
   return import.meta.env.DEV
 }
 
+// Get API base URL from environment
+export const getApiBaseUrl = () => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8888'
+  return `${baseUrl}/api/crypto-transactions`
+}
+
 // Get all configuration for debugging
 export const getConfig = () => {
   return {
@@ -68,10 +74,12 @@ export const getConfig = () => {
     endpoint: getSolanaEndpoint(),
     networkName: getNetworkName(),
     isDevelopment: isDevelopment(),
+    apiBaseUrl: getApiBaseUrl(),
     env: {
       VITE_SOLANA_NETWORK: import.meta.env.VITE_SOLANA_NETWORK,
       VITE_SOLANA_RPC_URL: import.meta.env.VITE_SOLANA_RPC_URL,
       VITE_LOCAL_RPC_URL: import.meta.env.VITE_LOCAL_RPC_URL,
+      VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
     }
   }
 }

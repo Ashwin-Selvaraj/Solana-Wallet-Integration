@@ -1,16 +1,35 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import WalletBalance from './WalletBalance'
 import DepositComponent from './DepositComponent'
+import LoginComponent from './LoginComponent'
+import authService from '../services/authService'
 
 const WalletContent = () => {
   console.log('📱 WalletContent component is rendering')
-  console.log('📱 WalletContent component is rendering')
-  console.log('📱 WalletContent component is rendering')
   
   const { publicKey, connected, connecting, disconnect } = useWallet()
+  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated())
+  
   console.log('Wallet state:', { publicKey, connected, connecting })
+  console.log('Auth state:', { isAuthenticated })
+
+  // Update auth state when token changes
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsAuthenticated(authService.isAuthenticated())
+    }
+    
+    // Check auth state periodically
+    const interval = setInterval(checkAuth, 1000)
+    
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleLoginSuccess = (token) => {
+    setIsAuthenticated(true)
+  }
 
   return (
     <div className='App'>
@@ -31,11 +50,14 @@ const WalletContent = () => {
         <p>Connecting to wallet...</p>
       )}
 
+      {/* Authentication Component */}
+      <LoginComponent onLoginSuccess={handleLoginSuccess} />
+
       {/* Wallet Balance Component */}
       <WalletBalance />
 
-      {/* Deposit Component - Only show when wallet is connected */}
-      {connected && <DepositComponent />}
+      {/* Deposit Component - Only show when wallet is connected AND user is authenticated */}
+      {connected && isAuthenticated && <DepositComponent />}
     </div>
   )
 }

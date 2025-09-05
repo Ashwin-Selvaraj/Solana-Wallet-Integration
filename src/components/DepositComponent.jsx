@@ -7,16 +7,35 @@ import {
   LAMPORTS_PER_SOL,
   sendAndConfirmTransaction 
 } from '@solana/web3.js'
+import cryptoTransactionService from '../services/cryptoTransactionService'
+import blockchainMonitorService from '../services/blockchainMonitorService'
 
 const DepositComponent = () => {
   const { connection } = useConnection()
   const { publicKey, signTransaction, connected } = useWallet()
+  
+  // Initialize blockchain monitor when component mounts
+  React.useEffect(() => {
+    if (connection) {
+      console.log('🔧 Initializing blockchain monitor with connection:', connection)
+      blockchainMonitorService.initialize(connection)
+    } else {
+      console.log('⚠️ No connection available for blockchain monitor initialization')
+    }
+    
+    // Cleanup monitoring when component unmounts
+    return () => {
+      console.log('🧹 Cleaning up blockchain monitor')
+      blockchainMonitorService.stopAllMonitoring()
+    }
+  }, [connection])
   
   const [amount, setAmount] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
   const [txSignature, setTxSignature] = useState(null)
+  const [transactionId, setTransactionId] = useState(null)
 
   // Get game account address from environment
   const gameAccountAddress = import.meta.env.VITE_GAME_ACCOUNT_ADDRESS || '11111111111111111111111111111112'
@@ -36,6 +55,7 @@ const DepositComponent = () => {
     setError(null)
     setSuccess(null)
     setTxSignature(null)
+    setTransactionId(null)
 
     try {
       console.log('🔄 Starting deposit transaction...')
@@ -89,16 +109,68 @@ const DepositComponent = () => {
       
       console.log('🚀 Transaction sent:', signature)
 
-      // Wait for confirmation
-      const confirmation = await connection.confirmTransaction(signature, 'confirmed')
+      // Create transaction record in backend
+      console.log('🔄 Creating transaction record in backend...')
+      const transactionData = cryptoTransactionService.createDepositData(
+        amount,
+        publicKey.toString(),
+        gameAccountAddress,
+        signature
+      )
       
-      if (confirmation.value.err) {
-        throw new Error('Transaction failed')
+      const backendTransaction = await cryptoTransactionService.createTransaction(transactionData)
+      console.log('📊 Backend transaction response:', backendTransaction)
+      
+      // Extract transaction ID with comprehensive validation
+      let txId = null
+      
+      // Try different possible ID fields
+      if (backendTransaction.id) {
+        txId = backendTransaction.id
+      } else if (backendTransaction._id) {
+        txId = backendTransaction._id
+      } else if (backendTransaction.transactionId) {
+        txId = backendTransaction.transactionId
+      } else if (backendTransaction.data && backendTransaction.data.id) {
+        txId = backendTransaction.data.id
+      } else if (backendTransaction.data && backendTransaction.data._id) {
+        txId = backendTransaction.data._id
+      } else if (backendTransaction.result && backendTransaction.result.id) {
+        txId = backendTransaction.result.id
+      } else if (backendTransaction.result && backendTransaction.result._id) {
+        txId = backendTransaction.result._id
       }
-
-      console.log('✅ Transaction confirmed!')
       
-      setSuccess(`Successfully deposited ${amount} SOL to game account!`)
+      console.log('📊 Extracted transaction ID:', txId)
+      console.log('📊 ID type:', typeof txId)
+      
+      if (!txId) {
+        console.error('❌ No transaction ID found in response')
+        console.error('❌ Available fields:', Object.keys(backendTransaction))
+        
+        // Generate a temporary ID based on the transaction signature
+        txId = `temp_${signature.slice(0, 8)}_${Date.now()}`
+        console.warn('⚠️ Using temporary transaction ID:', txId)
+        console.warn('⚠️ Note: Status updates may not work properly without backend ID')
+      }
+      
+      setTransactionId(txId)
+      console.log('✅ Transaction record created with ID:', txId)
+
+      // Start automatic blockchain monitoring
+      console.log('🔍 Starting automatic blockchain monitoring...')
+      
+      // Ensure monitor is initialized before starting
+      if (!blockchainMonitorService.isInitialized) {
+        console.log('🔧 Re-initializing blockchain monitor...')
+        blockchainMonitorService.initialize(connection)
+      }
+      
+      await blockchainMonitorService.startMonitoring(txId, signature)
+      
+      console.log('✅ Transaction monitoring started! Status will be updated automatically.')
+      
+      setSuccess(`Transaction sent! ${amount} SOL deposit is being processed. Status will be updated automatically.`)
       setTxSignature(signature)
       setAmount('') // Clear form
 
@@ -202,6 +274,11 @@ const DepositComponent = () => {
               >
                 View on Explorer
               </a>
+            </div>
+          )}
+          {transactionId && (
+            <div style={{ marginTop: '5px', fontSize: '12px' }}>
+              <strong>Transaction ID:</strong> {transactionId}
             </div>
           )}
         </div>
