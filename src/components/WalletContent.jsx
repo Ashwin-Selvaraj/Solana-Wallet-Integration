@@ -97,20 +97,12 @@ const WalletContent = () => {
 
   // Disconnect wallet from backend when wallet disconnects
   const disconnectWalletFromBackend = async () => {
-    if (!isAuthenticated) {
-      console.log('⚠️ Cannot disconnect wallet: not authenticated')
-      return
-    }
-
-    try {
-      console.log('🔄 Disconnecting wallet from backend')
-      await walletConnectService.disconnectWallet()
-      setWalletConnectedToBackend(false)
-      setWalletConnectionError(null)
-      console.log('✅ Wallet disconnected from backend successfully')
-    } catch (error) {
-      console.error('❌ Error disconnecting wallet from backend:', error)
-    }
+    console.log('🔄 Disconnecting wallet (local state only)')
+    
+    // Just update local state - no backend API call needed for disconnection
+    setWalletConnectedToBackend(false)
+    setWalletConnectionError(null)
+    console.log('✅ Wallet disconnected successfully (local state updated)')
   }
 
   // Handle wallet connection changes
