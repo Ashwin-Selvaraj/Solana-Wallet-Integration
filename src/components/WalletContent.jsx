@@ -5,6 +5,7 @@ import WalletBalance from './WalletBalance'
 import DepositComponent from './DepositComponent'
 import LoginComponent from './LoginComponent'
 import GameBalanceComponent from './GameBalanceComponent'
+import WithdrawComponent from './WithdrawComponent'
 import authService from '../services/authService'
 import walletConnectService from '../services/walletConnectService'
 
@@ -242,6 +243,9 @@ const WalletContent = () => {
 
       {/* Deposit Component - Only show when wallet is connected AND user is authenticated */}
       {connected && isAuthenticated && <DepositComponent />}
+
+      {/* Withdraw Component - Only show when wallet is connected AND user is authenticated */}
+      {connected && isAuthenticated && <WithdrawComponent />}
     </div>
   )
 }

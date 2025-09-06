@@ -139,22 +139,22 @@ const GameBalanceComponent = () => {
         }}>
           {/* Main Balance Display */}
           <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '10px', textAlign: 'center' }}>
-            💰 Game Balance: {formatBalance(balance.balance_sol)}
+            💰 Game Balance: {formatBalance(balance.walletbalance || balance.balance_sol)}
           </div>
           
           {/* Balance Details */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
             <div style={{ fontSize: '14px' }}>
-              <strong>Available:</strong> {formatBalance(balance.available_balance)}
+              <strong>Available:</strong> {formatBalance(balance.availableBalance || balance.available_balance)}
             </div>
             <div style={{ fontSize: '14px' }}>
-              <strong>Locked:</strong> {formatBalance(balance.locked_balance)}
+              <strong>Locked:</strong> {formatBalance(balance.lockedWalletbalance || balance.locked_balance)}
             </div>
             <div style={{ fontSize: '14px' }}>
-              <strong>Total Deposited:</strong> {formatBalance(balance.total_deposited)}
+              <strong>Total Deposited:</strong> {formatBalance(balance.totalDeposit || balance.total_deposited)}
             </div>
             <div style={{ fontSize: '14px' }}>
-              <strong>Total Withdrawn:</strong> {formatBalance(balance.total_withdrawn)}
+              <strong>Total Withdrawn:</strong> {formatBalance(balance.totalWithdrawn || balance.total_withdrawn)}
             </div>
           </div>
           
@@ -174,9 +174,9 @@ const GameBalanceComponent = () => {
           </div>
           
           {/* Last Transaction */}
-          {balance.last_transaction_at && (
+          {(balance.lastTransactionAt || balance.last_transaction_at) && (
             <div style={{ fontSize: '12px', color: '#666', marginBottom: '5px' }}>
-              <strong>Last Transaction:</strong> {formatDate(balance.last_transaction_at)}
+              <strong>Last Transaction:</strong> {formatDate(balance.lastTransactionAt || balance.last_transaction_at)}
             </div>
           )}
           
