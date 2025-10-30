@@ -411,4 +411,3 @@ const WithdrawComponent = () => {
 }
 
 export default WithdrawComponent
-
